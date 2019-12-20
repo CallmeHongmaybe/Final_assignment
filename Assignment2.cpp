@@ -1,107 +1,86 @@
-// Items side 
+#include <iostream>
+#include <string>
+#include <fstream>
+
+using namespace std;
+
 class Items {
 private:
     string ID;
     string Title;
     string rental_type;
-    int loanType;
-    double rental_fee;
-    int num_of_copies;
+    string loanType;
+    string rental_fee;
+    string num_of_copies;
     string genre;
 
 public:
     // for
-    string getID() {return ID;};
-    string getTitle() {return Title;};
-    int getLoanType() {return loanType;};
-    double getRentalFee() {return rental_fee;};
-    int get_num_of_copies() {return num_of_copies;};
-    string getGenre() {return genre;};
+    Items() {};
+
+//    string getID() {return ID;};
+//    string getTitle() {return Title;};
+//    string getLoanType() {return loanType;};
+//    double getRentalFee() {return rental_fee;};
+//    int get_num_of_copies() {return num_of_copies;};
+//    string getGenre() {return genre;};
 
     // for updating and retrieving data
-    void setID(string id) {ID = id;};
-    void setTitle(string title) {Title = title;};
-    void setloanType(int loan_type){ loanType = loan_type;};
-    void setRentalFee(double rentalFee) {rental_fee = rentalFee;};
-    void set_num_of_copies (int num_of_copies) {num_of_copies = num_of_copies;};
+    void setID(string &id) {ID = id;}
+    void setTitle(string &title) {Title = title;}
+    void setRentalType(string &rentalType) { rental_type = rentalType;}
+    void setloanType(string &loan_type){ loanType = loan_type;};
+    void setRentalFee(string &rentalFee) {rental_fee = rentalFee;};
+    void set_num_of_copies (string &numOfCopies) { num_of_copies = numOfCopies;};
+    void setGenre(string &Genre) {genre = Genre;};
 
     string toString() {
-        return this->ID + " " + this->Title + " " + to_string(this->loanType)  + " " + to_string(this->rental_fee) + " " + to_string(this->borrowed);
-    }
-};
-
-
-class Movie: public Items {
-private:
-    string Genre;
-public:
-    Movie(string ID, string Title, int loanType, double rental_fee) {
-        setID(ID);
-        setTitle(Title);
-        setloanType(loanType);
-        setRentalFee(rental_fee);
-    };
-    ~Movie() {};
-    string setGenre(string &genre) {Genre = genre;}
-};
-
-class DVD: public Items {
-private:
-public:
-    DVD(string ID, string Title, int loanType, double rental_fee) {
-        setID(ID);
-        setTitle(Title);
-        setloanType(loanType);
-        setRentalFee(rental_fee);
-    }
-    string setGenre(string &genre) {Genre = genre;}
-};
-
-class Game: public Items {
-private:
-    string rentalType = "Game";
-public:
-    Game(string ID, string Title, int loanType, double rental_fee) {
-        setID(ID);
-        setTitle(Title);
-        setloanType(loanType);
-        setRentalFee(rental_fee);
-    }
-    string getRentalType() {
-        return rentalType;
+        return ID + " , " + Title + " , " + rental_type + " , " + loanType  + " , " + rental_fee + " , " + num_of_copies + genre;
     }
 
+    ~Items() {cout << "Item destructed" << endl;};
 };
+
+void displayItems(Items *);
 
 void getRentalsFromFile() {
     fstream itemRentals;
     itemRentals.open("items.txt", ios::in | ios::out);
     string temp_line;
-    string itemAttributes[6];
+    string itemAttributes[7];
 
     int attribute_order = 0;
     while (getline(itemRentals, temp_line)) {
         if (temp_line[0] == '#') {
             continue;
         }
-        for (int i = 0; i <= temp_line.length() - 1; ++i) {
-            itemAttributes[attribute_order] += temp_line[i];
-            if (temp_line[i] == ',') {
-                attribute_order++;
-                break;
+        else {
+            for (char i : temp_line) {
+                itemAttributes[attribute_order] += i;
+                if (i == ',') {
+                    attribute_order++;
+                }
+            }
+
+            if (attribute_order == 6) {
+                auto *newItem = new Items();
+                newItem->setID(itemAttributes[0]);
+                newItem->setTitle(itemAttributes[1]);
+                newItem->setRentalType(itemAttributes[2]);
+                newItem->setloanType(itemAttributes[3]);
+                newItem->set_num_of_copies(itemAttributes[4]);
+                newItem->setRentalFee(itemAttributes[5]);
+                newItem->setGenre(itemAttributes[6]);
+                displayItems(newItem);
             }
         }
-
-        if (itemAttributes[2] == "game") {
-            displayItems(new Items(itemAttributes[0], itemAttributes[1], itemAttributes[2], itemAttributes[3], itemAttributes[4], itemAttributes[5], itemAttributes[6]));
-        }
     }
-
 }
 
 void displayItems(Items *item) {
-        cout << item->toString() << endl;
+    cout << item->toString() << endl;
 }
+
 
 int main() {
 //    int choice;
