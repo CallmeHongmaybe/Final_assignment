@@ -42,7 +42,9 @@ public:
     ~Items() {};
 };
 
-void displayItems(Items *, int i);
+void displayItems(Items *, int listSize);
+void searchForItem(Items *, int listSize, const string &basicString);
+void printMenu();
 
 int main() {
     ifstream itemRentals;
@@ -103,31 +105,30 @@ int main() {
 
     itemRentals.close();
 
-        int choice;
-        cout << "Welcome to Genie's video store. Please choose any option below." << endl;
-        cout << "1. Add a new item." << endl;
-        cout << "2. Update an existing item." << endl;
-        cout << "3. Delete an item." << endl;
-        cout << "4. Rent an item" << endl;
-        cout << "5. Return an item. " << endl;
-        cout << "6. Display all items" << endl;
-        cout << "7. Search for an item." << endl;
-        cout << "################" << endl;
-        cin >> choice;
+        string choice;
 
-        switch(choice) {
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-            case 6:
-                displayItems(itemsList, item_list_size);
-                break;
-            case 7:
-                cout << "TBA" << endl;
-                break;
+        while(choice != "Exit") {
+            printMenu();
+            cin >> choice;
+            switch(stoi(choice)) {
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                    displayItems(itemsList, item_list_size);
+                    break;
+                case 7:
+                    string requestedID;
+                    cout << "Can I ask for the ID please? " << endl;
+                    cin >> requestedID;
+                    searchForItem(itemsList, item_list_size, requestedID);
+                    break;
+            }
         }
+
+
     return 0;
 };
 
@@ -135,6 +136,32 @@ void displayItems(Items *item, int list_size) {
     for (int i = 0; i < list_size ; i++) {
         cout << item[i].toString() << endl;
     }
+}
+
+void searchForItem(Items *item, int list_size, const string& requestedID) {
+    int found = 0;
+    for (int i = 0; i < list_size ; i++) {
+        if (item[i].getID() == requestedID) {
+            cout << item[i].toString() << endl;
+            found++;
+        }
+    }
+    if (found == 0) {
+        cout << "Nothing found" << endl;
+    }
+}
+
+void printMenu() {
+    cout << "#################" << endl;
+    cout << "Welcome to Genie's video store. Please choose any option below." << endl;
+    cout << "1. Add a new item." << endl;
+    cout << "2. Update an existing item." << endl;
+    cout << "3. Delete an item." << endl;
+    cout << "4. Rent an item" << endl;
+    cout << "5. Return an item. " << endl;
+    cout << "6. Display all items" << endl;
+    cout << "7. Search for an item." << endl;
+    cout << "################" << endl;
 }
 
 
