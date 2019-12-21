@@ -21,6 +21,7 @@ public:
     string getID() {return ID;};
     string getTitle() {return Title;};
     string getLoanType() {return loanType;};
+    string getRentalType() {return rental_type;};
     string getRentalFee() {return rental_fee;};
     string get_num_of_copies() {return num_of_copies;};
     string getGenre() {return genre;};
@@ -43,15 +44,17 @@ public:
 
 void displayItems(Items *, int i);
 
-void getRentalsFromFile(ifstream &rentalStream) {      // returns item list from file
+int main() {
+    ifstream itemRentals;
+    string itemFile = "items.txt";
+    itemRentals.open(itemFile.c_str(), ios::in | ios::out);
     string temp_line;
     string itemAttributes[7];
 
     int item_list_size = 1;
+    auto *itemsList = new Items[1];
 
-    auto *itemsList = new Items[item_list_size];
-
-    while (getline(rentalStream, temp_line)) {
+    while (getline(itemRentals, temp_line)) {
         if (temp_line[0] == '#') {
             continue;
         }
@@ -67,11 +70,12 @@ void getRentalsFromFile(ifstream &rentalStream) {      // returns item list from
                 attribute_order++;                                          // prints attribute
                 temp_line.erase(0, pos + delimiter.length());       // deletes the token with its delimiter and move to the next attribute
             }
-                if (itemAttributes[5].empty()) {
-                    itemAttributes[5] = temp_line.erase(temp_line.length() - 1);
-                    itemAttributes[6] = "";
-                }
-                else itemAttributes[6] = temp_line.erase(temp_line.length() - 1);  // assign the last of temp_line to attribute no.7 and erasing trailing \r
+            string lastAttribute = temp_line.erase(temp_line.length() - 1); // the last of temp_line to attribute no.7 and erasing trailing \r
+            if (itemAttributes[5].empty()) {
+                itemAttributes[5] = lastAttribute;
+                itemAttributes[6] = "";
+            }
+            else itemAttributes[6] = lastAttribute;
 
 
             // initialize a new item
@@ -84,23 +88,46 @@ void getRentalsFromFile(ifstream &rentalStream) {      // returns item list from
             newItem->setRentalFee(itemAttributes[5]);
             newItem->setGenre(itemAttributes[6]);
             // add item into item list
-                itemsList[item_list_size - 1] = *newItem;
-                item_list_size++;
+
+            itemsList[item_list_size - 1] = *newItem;
+            auto dummyList = new Items[item_list_size + 1];
+            for (int i = 0; i < item_list_size; ++i) {
+                dummyList[i] = itemsList[i];
+            }
+            delete[] itemsList;
+            itemsList = dummyList;
+            item_list_size++;
         }
-        // export item list
-                displayItems(itemsList, item_list_size);
-                item_list_size--;
     }
+    item_list_size--;
 
-}
-
-
-int main() {
-    ifstream itemRentals;
-    string itemFile = "items.txt";
-    itemRentals.open(itemFile.c_str(), ios::in | ios::out);
-    getRentalsFromFile(itemRentals);
     itemRentals.close();
+
+        int choice;
+        cout << "Welcome to Genie's video store. Please choose any option below." << endl;
+        cout << "1. Add a new item." << endl;
+        cout << "2. Update an existing item." << endl;
+        cout << "3. Delete an item." << endl;
+        cout << "4. Rent an item" << endl;
+        cout << "5. Return an item. " << endl;
+        cout << "6. Display all items" << endl;
+        cout << "7. Search for an item." << endl;
+        cout << "################" << endl;
+        cin >> choice;
+
+        switch(choice) {
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 5:
+            case 6:
+                displayItems(itemsList, item_list_size);
+                break;
+            case 7:
+                cout << "TBA" << endl;
+                break;
+        }
     return 0;
 };
 
@@ -110,31 +137,7 @@ void displayItems(Items *item, int list_size) {
     }
 }
 
-//    int choice;
-//    cout << "Welcome to Genie's video store. Please choose any option below." << endl;
-//    cout << "1. Add a new item." << endl;
-//    cout << "2. Update an existing item." << endl;
-//    cout << "3. Delete an item." << endl;
-//    cout << "4. Rent an item" << endl;
-//    cout << "5. Return an item. " << endl;
-//    cout << "6. Search for an item." << endl;
-//    cin >> choice;
-//    switch(choice) {
-//        case 1:
-//            string type;
-//            cout << "May I ask for the item type ? " << endl;
-//            cin >> type;
-//            cout << "To add an item, please enter the ID, title, item type, loan type, number of copies to add and rental fee" << endl;
-//            if (type != "game") {
-//                cout << "Also give me the genre" << endl;
-//            }
-//            else if (type == "movie") {
-//                cout << "move" << endl;
-//            }
-//            else if (type == "dvd") {
-//                cout << "ded" << endl;
-//            }
-//    }
+
 
 
 
