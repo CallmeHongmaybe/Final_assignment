@@ -32,6 +32,7 @@ public:
 	string getLoanType() { return loanType; }
 	double getRentalFee() { return rental_fee; }
 	int get_num_of_copies() { return num_of_copies; }
+	virtual string getGenre() { return "Dummy"; }
 
 
 	// Setter
@@ -41,6 +42,7 @@ public:
 	void setRentalFee(double rentalFee) { rental_fee = rentalFee; }
 	void set_num_of_copies(int num_of_copies) { this->num_of_copies = num_of_copies; }
 	void setRentalType(string rentalType) { rental_type = rentalType; };
+	virtual void setGenre(string genre) { }
 
 	virtual string toString() {
 		return ID + "," + Title + "," + rental_type + "," + loanType + "," + to_string(num_of_copies) + "," + to_string(rental_fee);
@@ -62,8 +64,8 @@ public:
 		Genre = genre;
 	}
 	~Movie() {}
-	string getGenre() { return Genre; }
-	void setGenre(string& genre) { Genre = genre; }
+	virtual string getGenre() { return Genre; }
+	virtual void setGenre(string genre) { Genre = genre; }
 	virtual string toString() {
 		return this->getID() + "," + this->getTitle() + "," + this->getRentalType() + "," + this->getLoanType() + "," + to_string(this->get_num_of_copies()) + "," + to_string(this->getRentalFee()) + "," + Genre;
 	}
@@ -83,8 +85,8 @@ public:
 		Genre = genre;
 	}
 	~DVD() {}
-	string getGenre() { return Genre; }
-	void setGenre(string& genre) { Genre = genre; }
+	virtual string getGenre() { return Genre; }
+	virtual void setGenre(string genre) { Genre = genre; }
 	virtual string toString() {
 		return this->getID() + "," + this->getTitle() + "," + this->getRentalType() + "," + this->getLoanType() + "," + to_string(this->get_num_of_copies()) + "," + to_string(this->getRentalFee()) + "," + Genre;
 	}
@@ -173,9 +175,8 @@ int searchItemID(Items** item_list, int item_list_size) {
 
 Items** deleteItem(Items** item_list, int item_list_size) {
 	int index = searchItemID(item_list, item_list_size);
-	cout << index << endl;
 	if (index == -1) {
-		cout << "No match item found" << endl;
+		cerr << "No match item found" << endl;
 	}
 	else {
 		Items** temp_item_list = new Items * [item_list_size];
@@ -189,6 +190,7 @@ Items** deleteItem(Items** item_list, int item_list_size) {
 		delete[] item_list;
 		item_list = temp_item_list;
 	}
+	cout << "Item deleted" << endl;
 	return item_list;
 }
 
@@ -204,7 +206,7 @@ Items** addItem(Items** item_list, int item_list_size) {
 		cerr << "Duplicate item ID !" << endl;
 		return item_list;
 	}
-	cout << "Enter Title";
+	cout << "Enter Title: ";
 	getline(cin, Title);
 	cout << "Enter rental type (Record/DVD/Game): ";
 	getline(cin, rental_type);
@@ -257,6 +259,106 @@ Items** addItem(Items** item_list, int item_list_size) {
 	temp_item_list[item_list_size + 1] = NULL;
 	delete[] item_list;
 	item_list = temp_item_list;
+	cout << "Item added" << endl;
+	return item_list;
+}
+
+void displayOutOfStock(Items** item_list, int item_list_size) {
+	cout << "Out of stocks items: " << endl;
+	for (int i = 0; i < item_list_size; i++) {
+		if (item_list[i]->get_num_of_copies() == 0) {
+			cout << item_list[i]->toString() << endl;
+		}
+	}
+}
+
+Items** updateItemList(Items** item_list, int item_list_size) {
+	string ID, Title, rental_type, loan_type, rental_fee, number_of_copies, genre;
+	int index = searchItemID(item_list, item_list_size);
+	if (index == -1) {
+		cerr << "No match item found" << endl;
+	}
+	else {
+		cout << "Item information: " << item_list[index]->toString() << endl;
+		cout << "Enter new item ID (e.g., I201-1999): ";
+		getline(cin, ID);
+		if (!checkItemID(ID)) {
+			cerr << "Invalid item ID format !" << endl;
+			return item_list;
+		}
+		else if (checkDuplicateItemID(item_list, ID, item_list_size)) {
+			cerr << "Duplicate item ID !" << endl;
+			return item_list;
+		}
+		cout << "Enter new Title: ";
+		getline(cin, Title);
+		cout << "Enter rental type (Record/DVD/Game): ";
+		getline(cin, rental_type);
+		if (!checkRentalType(rental_type)) {
+			cerr << "Invalid rental type !" << endl;
+			return item_list;
+		}
+		cout << "Enter new loan type (1-week/2-day): ";
+		getline(cin, loan_type);
+		if (!checkLoanType(loan_type)) {
+			cerr << "Invalid loan type !" << endl;
+			return item_list;
+		}
+		cout << "Enter new number of copies: ";
+		getline(cin, number_of_copies);
+		if (!checkNumOfCopies(number_of_copies)) {
+			cerr << "Invalid number of copies !" << endl;
+			return item_list;
+		}
+		cout << "Enter new rental fee: ";
+		getline(cin, rental_fee);
+		if (!isDouble(rental_fee.c_str())) {
+			cerr << "Invalid rental fee !" << endl;
+			return item_list;
+		}
+		if (rental_type == item_list[index]->getRentalType()) {
+			if (rental_type == "Record" || rental_type == "DVD") {
+				cout << "Enter new genre: ";
+				getline(cin, genre);
+				if (!checkGenre(genre)) {
+					cerr << "Invalid genre !" << endl;
+					return item_list;
+				}
+				item_list[index]->setGenre(genre);
+			}
+			item_list[index]->setID(ID);
+			item_list[index]->setTitle(Title);
+			item_list[index]->setRentalType(rental_type);
+			item_list[index]->setloanType(loan_type);
+			item_list[index]->set_num_of_copies(stoi(number_of_copies));
+			item_list[index]->setRentalFee(stod(rental_fee));
+		}
+		else {
+			if (rental_type == "Record") {
+				cout << "Enter new genre: ";
+				getline(cin, genre);
+				if (!checkGenre(genre)) {
+					cerr << "Invalid genre !" << endl;
+					return item_list;
+				}
+				delete item_list[index];
+				item_list[index] = new Movie(ID, Title, rental_type, loan_type, stoi(number_of_copies), stod(rental_fee), genre);
+			} else if (rental_type == "DVD") {
+				cout << "Enter new genre: ";
+				getline(cin, genre);
+				if (!checkGenre(genre)) {
+					cerr << "Invalid genre !" << endl;
+					return item_list;
+				}
+				delete item_list[index];
+				item_list[index] = new DVD(ID, Title, rental_type, loan_type, stoi(number_of_copies), stod(rental_fee), genre);
+			} else {
+				delete item_list[index];
+				item_list[index] = new Game(ID, Title, rental_type, loan_type, stoi(number_of_copies), stod(rental_fee));
+			}
+		}
+	}
+	cout << "Item updated" << endl;
 	return item_list;
 }
 
@@ -266,7 +368,6 @@ void displayItemList(Items** item_list, int item_list_size) {
 		cout << item_list[i]->toString() << endl;
 	}
 }
-
 
 int main() {
 	fstream itemRentals;
@@ -327,24 +428,28 @@ int main() {
 				if (item_list[item_list_size] != NULL) {
 					item_list_size++;
 				}
-			}
-			if (suboption == "Delete") {
+			} else if (suboption == "Delete") {
 				item_list = deleteItem(item_list, item_list_size);
 				if (item_list[item_list_size-1] == NULL) {
 					item_list_size--;
 				}
+			} else if (suboption == "Update") {
+				item_list = updateItemList(item_list, item_list_size);
+				cout << typeid(*item_list[0]).name() << endl;
 			}
 		} else if (user_input == "2") { //search item
 			int index = searchItemID(item_list, item_list_size);
 			if (index == -1) {
-				cout << "No match item found" << endl;
+				cerr << "No match item found" << endl;
 			} else {
 				cout << "Item information: ";
 				cout << item_list[index]->toString() << endl;
 			}
 		} else if (user_input == "3") { //Print all items
 			displayItemList(item_list, item_list_size);
-		}
+		} else if (user_input == "4") { //Display out of stock items
+			displayOutOfStock(item_list, item_list_size);
+		} 
 	}
 
 	return 0;
