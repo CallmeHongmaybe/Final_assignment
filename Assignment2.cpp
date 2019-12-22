@@ -16,14 +16,6 @@ private:
 
 public:
 	Items() {}
-	Items(string ID, string Title, string rental_type, string loanType, int num_of_copies, double rental_fee) {
-		this->ID = ID;
-		this->Title = Title;
-		this->rental_type = rental_type;
-		this->loanType = loanType;
-		this->num_of_copies = num_of_copies;
-		this->rental_fee = rental_fee;
-	}
 	~Items() {}
 	// Getter
 	string getID() { return ID; }
@@ -435,7 +427,6 @@ int main() {
 				}
 			} else if (suboption == "Update") {
 				item_list = updateItemList(item_list, item_list_size);
-				cout << typeid(*item_list[0]).name() << endl;
 			}
 		} else if (user_input == "2") { //search item
 			int index = searchItemID(item_list, item_list_size);
