@@ -36,20 +36,22 @@ public:
     void setGenre(string &Genre) {genre = Genre;};
 
     string toString() {
-        return ID + " , " + Title + " , " + rental_type + " , " + loanType  + " , " + num_of_copies  + " , " + rental_fee + " , " + genre;
+        return ID + "," + Title + "," + rental_type + "," + loanType  + "," + num_of_copies  + "," + rental_fee + "," + genre;
     }
 
     ~Items() {};
 };
 
 void displayItems(Items *, int listSize);
-void searchForItem(Items *, int listSize, const string &basicString);
+int searchForItem(Items *, int listSize, const string &basicString);
+void updateItem(Items *, int listSize);
+//void autoSaver(Items *item, int list_size, ofstream fileWriter);
 void printMenu();
 
 int main() {
     ifstream itemRentals;
     string itemFile = "items.txt";
-    itemRentals.open(itemFile.c_str(), ios::in | ios::out);
+    itemRentals.open(itemFile.c_str(), ios::in);
     string temp_line;
     string itemAttributes[7];
 
@@ -57,13 +59,9 @@ int main() {
     auto *itemsList = new Items[1];
 
     while (getline(itemRentals, temp_line)) {
-        if (temp_line[0] == '#') {
-            continue;
-        }
-        else {
             string delimiter = ",";     // initialize a delimiter and the token
             string itemAttribute;
-//
+
             size_t pos = 0;
             int attribute_order = 0;
             while ((pos = temp_line.find(delimiter)) != string::npos) {     // npos here means until the end of a string
@@ -72,7 +70,7 @@ int main() {
                 attribute_order++;                                          // prints attribute
                 temp_line.erase(0, pos + delimiter.length());       // deletes the token with its delimiter and move to the next attribute
             }
-            string lastAttribute = temp_line.erase(temp_line.length() - 1); // the last of temp_line to attribute no.7 and erasing trailing \r
+            string lastAttribute = temp_line; // the last of temp_line to attribute no.7 and erasing trailing \r
             if (itemAttributes[5].empty()) {
                 itemAttributes[5] = lastAttribute;
                 itemAttributes[6] = "";
@@ -93,26 +91,28 @@ int main() {
 
             itemsList[item_list_size - 1] = *newItem;
             auto dummyList = new Items[item_list_size + 1];
-            for (int i = 0; i < item_list_size; ++i) {
+            for (int i = 0; i < item_list_size; i++) {
                 dummyList[i] = itemsList[i];
             }
             delete[] itemsList;
             itemsList = dummyList;
             item_list_size++;
         }
-    }
     item_list_size--;
-
     itemRentals.close();
 
-        string choice;
+//    ofstream fileWriter;
+//    fileWriter.open(itemFile.c_str(), ios::out);
 
+        string choice;
         while(choice != "Exit") {
             printMenu();
             cin >> choice;
             switch(stoi(choice)) {
                 case 1:
                 case 2:
+                    updateItem(itemsList, item_list_size);
+                    break;
                 case 3:
                 case 4:
                 case 5:
@@ -123,10 +123,18 @@ int main() {
                     string requestedID;
                     cout << "Can I ask for the ID please? " << endl;
                     cin >> requestedID;
-                    searchForItem(itemsList, item_list_size, requestedID);
+                    int index = searchForItem(itemsList, item_list_size, requestedID);
+                    cout << itemsList[index].toString() << endl;
                     break;
             }
+//            for (int i = 0; i < item_list_size; i++) {
+//                fileWriter << itemsList[i].toString() << endl;
+//            }
         }
+
+//        if (choice == "Exit") {
+//            fileWriter.close();
+//        }
 
 
     return 0;
@@ -138,17 +146,50 @@ void displayItems(Items *item, int list_size) {
     }
 }
 
-void searchForItem(Items *item, int list_size, const string& requestedID) {
+int searchForItem(Items *item, int list_size, const string& requestedID) {
     int found = 0;
+    int index = 0;
     for (int i = 0; i < list_size ; i++) {
-        if (item[i].getID() == requestedID) {
-            cout << item[i].toString() << endl;
+        string id = item[i].getID();                         // getting the id firsthand
+//        string trimmedID = id.erase(id.length() - 2);   // trimming spaces in between
+        if (id == requestedID) {
             found++;
+            break;
+        }
+        else {
+            index++;
         }
     }
     if (found == 0) {
-        cout << "Nothing found" << endl;
+        cout << "No item matches your query" << endl;
     }
+    return index;
+}
+
+void updateItem(Items *item, int list_size) {
+    string ID;
+    cout << "Tell me the ID of a product you want to edit" << endl;
+    cin >> ID;
+    cout << "Enter each field accordingly. Enter to skip the part you don't want to edit." << endl;
+    string prompts[7] = {"ID", "Title", "Rental type", "Loan type", "No. of copies", "Rental fee", "Genre"};
+    string itemData[7];
+
+    int index = searchForItem(item, list_size, ID);
+    for (int i = 0; i < 7; i++) {
+        if (i == 0) {
+            cin.ignore();
+        }
+        cout << prompts[i] << " = ";
+        getline(cin, itemData[i]);
+    }
+
+    if (!itemData[0].empty()) item[index].setID(itemData[0]);
+    if (!itemData[1].empty()) item[index].setTitle(itemData[1]);
+    if (!itemData[2].empty()) item[index].setRentalType(itemData[2]);
+    if (!itemData[3].empty()) item[index].setloanType(itemData[3]);
+    if (!itemData[4].empty()) item[index].set_num_of_copies(itemData[4]);
+    if (!itemData[5].empty()) item[index].setRentalFee(itemData[5]);
+    if (!itemData[6].empty()) item[index].setGenre(itemData[6]);
 }
 
 void printMenu() {
